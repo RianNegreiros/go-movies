@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/riannegreiros/go-movies/handlers"
 	"github.com/riannegreiros/go-movies/logger"
 )
 
@@ -21,6 +22,10 @@ func initializeLogger() *logger.Logger {
 func main() {
 
 	logInstance := initializeLogger()
+
+	moviesHandler := handlers.MoviesHandler{}
+
+	http.HandleFunc("/api/movies/top", moviesHandler.GetTopMovies)
 
 	http.Handle("/", http.FileServer(http.Dir("public")))
 
