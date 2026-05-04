@@ -29,7 +29,7 @@ func main() {
 
 	logInstance := initializeLogger()
 
-	if err := godotenv.Load(); err != nil {
+	if err := godotenv.Load(".env.local"); err != nil {
 		log.Fatal("No .env file available")
 	}
 
@@ -56,6 +56,9 @@ func main() {
 
 	http.HandleFunc("/api/movies/top", moviesHandler.GetTopMovies)
 	http.HandleFunc("/api/movies/random", moviesHandler.GetRandomMovies)
+	http.HandleFunc("/api/movies/search", moviesHandler.SearchMovies)
+	http.HandleFunc("/api/movies/", moviesHandler.GetMovie)
+	http.HandleFunc("/api/genres", moviesHandler.GetGenres)
 
 	http.Handle("/", http.FileServer(http.Dir("public")))
 
