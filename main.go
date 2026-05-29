@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -60,15 +61,16 @@ func main() {
 	http.HandleFunc("/api/movies/", moviesHandler.GetMovie)
 	http.HandleFunc("/api/genres", moviesHandler.GetGenres)
 
-	fileServer := http.FileServer(http.Dir("public"))
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		_, err := os.Stat("public" + r.URL.Path)
-		if os.IsNotExist(err) {
-			http.ServeFile(w, r, "public/index.html")
-			return
-		}
-		fileServer.ServeHTTP(w, r)
-	})
+	// Handler catch-all
+	catchAllHandler := func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "./public/index.html")
+	}
+	http.HandleFunc("/movies", catchAllHandler)
+	http.HandleFunc("/movies/", catchAllHandler)
+	http.HandleFunc("/account/", catchAllHandler)
+
+	http.Handle("/", http.FileServer(http.Dir("public")))
+	fmt.Println("Serving the files")
 
 	const addr = ":8080"
 	err = http.ListenAndServe(addr, nil)
