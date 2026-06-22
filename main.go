@@ -46,14 +46,21 @@ func main() {
 
 	defer db.Close()
 
+	accountRepo, err := data.NewAccountRepository(db, logInstance)
+	if err != nil {
+		log.Fatalf("Failed to initalize account repository: %v", err)
+	}
+
+	accountHandler := handlers.NewAccountHandler(accountRepo, logInstance)
+	http.HandleFunc("/api/account/register/", accountHandler.Register)
+	http.HandleFunc("/api/account/authenticate/", accountHandler.Authenticate)
+
 	movieRepo, err := data.NewMovieRepository(db, logInstance)
 	if err != nil {
 		log.Fatalf("Failed to initalize movie repository: %v", err)
 	}
 
-	moviesHandler := handlers.MoviesHandler{}
-	moviesHandler.Storage = movieRepo
-	moviesHandler.Logger = logInstance
+	moviesHandler := handlers.NewMoviesHandler(movieRepo, logInstance)
 
 	http.HandleFunc("/api/movies/top", moviesHandler.GetTopMovies)
 	http.HandleFunc("/api/movies/random", moviesHandler.GetRandomMovies)
