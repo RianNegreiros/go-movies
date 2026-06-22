@@ -59,7 +59,7 @@ window.app = {
             const response = await API.register(name, email, password);
             if (response.success) {
                 app.Store.jwt = response.jwt;
-                app.Router.go("/account/");
+                app.Router.go("/account");
             } else {
                 app.showError(response.message, false);
             }
@@ -80,12 +80,16 @@ window.app = {
             const response = await API.authenticate(email, password);
             if (response.success) {
                 app.Store.jwt = response.jwt;
-                app.Router.go("/account/");
+                app.Router.go("/account");
             } else {
                 app.showError(response.message, false);
             }
         } else {
             app.showError(errors.join(". "), false);
         }
+    },
+    logout: () => {
+        Store.jwt = null;
+        app.Router.go("/");
     },
 };

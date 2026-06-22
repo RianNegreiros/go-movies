@@ -31,10 +31,10 @@ export const API = {
         }
     },
     register: async (name, email, password) => {
-        return await API.send("account/register/", { name, email, password });
+        return await API.send("account/register", { name, email, password });
     },
     authenticate: async (email, password) => {
-        return await API.send("account/authenticate/", { email, password });
+        return await API.send("account/authenticate", { email, password });
     },
     send: async (service, args) => {
         try {
