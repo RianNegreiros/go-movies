@@ -15,20 +15,36 @@ import (
 	_ "github.com/lib/pq"
 )
 
-func initializeLogger() *logger.Logger {
+func routes(accountHandler *handlers.AccountHandler, moviesHandler *handlers.MoviesHandler) *http.ServeMux {
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("POST /api/account/register", accountHandler.Register)
+	mux.HandleFunc("POST /api/account/authenticate", accountHandler.Authenticate)
+
+	mux.HandleFunc("GET /api/movies/top", moviesHandler.GetTopMovies)
+	mux.HandleFunc("GET /api/movies/random", moviesHandler.GetRandomMovies)
+	mux.HandleFunc("GET /api/movies/search", moviesHandler.SearchMovies)
+	mux.HandleFunc("GET /api/movies/{id}", moviesHandler.GetMovie)
+	mux.HandleFunc("GET /api/genres", moviesHandler.GetGenres)
+
+	fs := http.FileServer(http.Dir("public"))
+	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if _, err := os.Stat("./public" + r.URL.Path); os.IsNotExist(err) {
+			http.ServeFile(w, r, "./public/index.html")
+			return
+		}
+		fs.ServeHTTP(w, r)
+	}))
+
+	return mux
+}
+
+func main() {
 	logInstance, err := logger.NewLogger("go-movies.log")
 	if err != nil {
 		log.Fatalf("Could not create a log instance %v", err)
 	}
-
 	defer logInstance.Close()
-
-	return logInstance
-}
-
-func main() {
-
-	logInstance := initializeLogger()
 
 	if err := godotenv.Load(".env.local"); err != nil {
 		log.Fatal("No .env file available")
@@ -36,46 +52,32 @@ func main() {
 
 	dbConnStr := os.Getenv("DATABASE_URL")
 	if dbConnStr == "" {
-		log.Fatal("DATBASE_URL not set")
+		log.Fatal("DATABASE_URL not set")
 	}
 
 	db, err := sql.Open("postgres", dbConnStr)
 	if err != nil {
 		log.Fatalf("Failed to connect to the database: %v", err)
 	}
-
 	defer db.Close()
+
+	accountRepo, err := data.NewAccountRepository(db, logInstance)
+	if err != nil {
+		log.Fatalf("Failed to initialize account repository: %v", err)
+	}
 
 	movieRepo, err := data.NewMovieRepository(db, logInstance)
 	if err != nil {
-		log.Fatalf("Failed to initalize movie repository: %v", err)
+		log.Fatalf("Failed to initialize movie repository: %v", err)
 	}
 
-	moviesHandler := handlers.MoviesHandler{}
-	moviesHandler.Storage = movieRepo
-	moviesHandler.Logger = logInstance
+	mux := routes(
+		handlers.NewAccountHandler(accountRepo, logInstance),
+		handlers.NewMoviesHandler(movieRepo, logInstance),
+	)
 
-	http.HandleFunc("/api/movies/top", moviesHandler.GetTopMovies)
-	http.HandleFunc("/api/movies/random", moviesHandler.GetRandomMovies)
-	http.HandleFunc("/api/movies/search", moviesHandler.SearchMovies)
-	http.HandleFunc("/api/movies/", moviesHandler.GetMovie)
-	http.HandleFunc("/api/genres", moviesHandler.GetGenres)
-
-	// Handler catch-all
-	catchAllHandler := func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "./public/index.html")
-	}
-	http.HandleFunc("/movies", catchAllHandler)
-	http.HandleFunc("/movies/", catchAllHandler)
-	http.HandleFunc("/account/", catchAllHandler)
-
-	http.Handle("/", http.FileServer(http.Dir("public")))
-	fmt.Println("Serving the files")
-
-	const addr = ":8080"
-	err = http.ListenAndServe(addr, nil)
-	if err != nil {
+	fmt.Println("Serving on :8080")
+	if err = http.ListenAndServe(":8080", mux); err != nil {
 		log.Fatalf("Could not start server: %v", err)
-		logInstance.Error("Could not start server: %v", err)
 	}
 }
