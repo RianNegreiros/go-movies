@@ -2,13 +2,16 @@ package main
 
 import (
 	"database/sql"
+	_ "embed"
 	"fmt"
 	"log"
-	"os"
 	"strings"
 
 	_ "github.com/lib/pq"
 )
+
+//go:embed database-dump.sql
+var sqlContent []byte
 
 func main() {
 	// Database connection string for your remote PostgreSQL database
@@ -24,13 +27,6 @@ func main() {
 	// Test the connection
 	if err = db.Ping(); err != nil {
 		log.Fatal("Failed to ping database:", err)
-	}
-
-	// Read the SQL file
-	sqlFilePath := "database-dump.sql" // Adjust this to your .sql file path
-	sqlContent, err := os.ReadFile(sqlFilePath)
-	if err != nil {
-		log.Fatal("Failed to read SQL file:", err)
 	}
 
 	// Split the SQL content into individual statements
