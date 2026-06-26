@@ -11,11 +11,13 @@ if (localStorage.getItem("jwt")) {
 
 const proxiedStore = new Proxy(Store, {
     set: (target, prop, value) => {
-        switch (prop) {
-            case "jwt":
-                target[prop] = value;
+        if (prop === "jwt") {
+            target[prop] = value;
+            if (value) {
                 localStorage.setItem("jwt", value);
-                break;
+            } else {
+                localStorage.removeItem("jwt");
+            }
         }
         return true;
     },
