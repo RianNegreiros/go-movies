@@ -1,0 +1,68 @@
+@baseUrl = http://localhost:8080/api
+
+### Register
+# @name register
+POST {{baseUrl}}/account/register
+Content-Type: application/json
+
+{
+  "name": "John Doe",
+  "email": "john.doe@mail.com",
+  "password": "123john@"
+}
+
+
+### Login  ← run this before any authenticated request
+# @name login
+POST {{baseUrl}}/account/authenticate
+Content-Type: application/json
+
+{
+  "email": "john.doe@mail.com",
+  "password": "123john@"
+}
+
+
+### Save to Watchlist
+POST {{baseUrl}}/account/save-to-collection
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.jwt}}
+
+{
+  "movie_id": 1,
+  "collection": "watchlist"
+}
+
+
+### Save to Favorites
+POST {{baseUrl}}/account/save-to-collection
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.jwt}}
+
+{
+  "movie_id": 1,
+  "collection": "favorite"
+}
+
+### Get favorites
+GET {{baseUrl}}/account/favorites
+Authorization: Bearer {{login.response.body.jwt}}
+
+### Get watchlist
+GET {{baseUrl}}/account/watchlist
+Authorization: Bearer {{login.response.body.jwt}}
+
+### Top Movies
+GET {{baseUrl}}/movies/top
+
+### Random Movies
+GET {{baseUrl}}/movies/random
+
+### Get Movie by ID
+GET {{baseUrl}}/movies/1
+
+### Search Movies
+GET {{baseUrl}}/movies/search?q=star wars
+
+### All Genres
+GET {{baseUrl}}/genres
