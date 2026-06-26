@@ -21,6 +21,13 @@ func routes(accountHandler *handlers.AccountHandler, moviesHandler *handlers.Mov
 	mux.HandleFunc("POST /api/account/register", accountHandler.Register)
 	mux.HandleFunc("POST /api/account/authenticate", accountHandler.Authenticate)
 
+	mux.Handle("/api/account/favorites",
+		accountHandler.AuthMiddleware(http.HandlerFunc(accountHandler.GetFavorites)))
+	mux.Handle("/api/account/watchlist",
+		accountHandler.AuthMiddleware(http.HandlerFunc(accountHandler.GetWatchlist)))
+	mux.Handle("/api/account/save-to-collection",
+		accountHandler.AuthMiddleware(http.HandlerFunc(accountHandler.SaveToCollection)))
+
 	mux.HandleFunc("GET /api/movies/top", moviesHandler.GetTopMovies)
 	mux.HandleFunc("GET /api/movies/random", moviesHandler.GetRandomMovies)
 	mux.HandleFunc("GET /api/movies/search", moviesHandler.SearchMovies)
