@@ -1,3 +1,5 @@
+import Store from "./Store.js";
+
 export const API = {
     baseURL: "/api/",
     getTopMovies: async () => {
@@ -15,21 +17,6 @@ export const API = {
     getGenres: async () => {
         return await API.fetch("genres");
     },
-    fetch: async (service, args) => {
-        try {
-            const queryString = args
-                ? new URLSearchParams(args).toString()
-                : "";
-            const response = await fetch(
-                API.baseURL + service + "?" + queryString,
-            );
-            const result = await response.json();
-            return result;
-        } catch (e) {
-            console.error(e);
-            app.showError();
-        }
-    },
     register: async (name, email, password) => {
         return await API.send("account/register", { name, email, password });
     },
@@ -37,20 +24,51 @@ export const API = {
         return await API.send("account/authenticate", { email, password });
     },
     send: async (service, args) => {
-        try {
-            const response = await fetch(API.baseURL + service, {
-                method: "POST",
+        const response = await fetch(API.baseURL + service, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: Store.jwt ? `Bearer ${Store.jwt}` : null,
+            },
+            body: JSON.stringify(args),
+        });
+        const result = await response.json();
+        return result;
+    },
+    fetch: async (service, args) => {
+        const queryString = args ? new URLSearchParams(args).toString() : "";
+        const response = await fetch(
+            API.baseURL + service + "?" + queryString,
+            {
                 headers: {
-                    "Content-Type": "application/json",
+                    Authorization: Store.jwt
+                        ? `Bearer ${Store.jwt}`
+                        : null,
                 },
-                body: JSON.stringify(args),
-            });
-            const result = await response.json();
-            return result;
+            },
+        );
+        const result = await response.json();
+        return result;
+    },
+    getFavorites: async () => {
+        try {
+            return await API.fetch("account/favorites");
         } catch (e) {
-            console.error(e);
-            app.showError();
+            app.Router.go("/account");
         }
+    },
+    getWatchlist: async () => {
+        try {
+            return await API.fetch("account/watchlist");
+        } catch (e) {
+            app.Router.go("/account");
+        }
+    },
+    saveToCollection: async (movie_id, collection) => {
+        return await API.send("account/save-to-collection", {
+            movie_id,
+            collection,
+        });
     },
 };
 
