@@ -38,7 +38,7 @@ type AccountHandler struct {
 }
 
 // Utility functions
-func (h *AccountHandler) writeJSONResponse(w http.ResponseWriter, data interface{}) error {
+func (h *AccountHandler) writeJSONResponse(w http.ResponseWriter, data any) error {
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(data); err != nil {
 		h.logger.Error("Failed to encode response", err)
@@ -137,7 +137,7 @@ func (h *AccountHandler) AuthMiddleware(next http.Handler) http.Handler {
 		// Parse and validate the token
 
 		token, err := jwt.Parse(tokenStr,
-			func(t *jwt.Token) (interface{}, error) {
+			func(t *jwt.Token) (any, error) {
 				// Ensure the signing method is HMAC
 				if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 					return nil, jwt.ErrSignatureInvalid
