@@ -36,15 +36,15 @@ Serves on `http://localhost:8080`.
 
 ## API
 
-| Method | Path | Auth | Description |
-|--------|------|------|-------------|
-| GET | `/api/movies/top` | — | Top movies |
-| GET | `/api/movies/random` | — | Random movies |
-| GET | `/api/movies/search` | — | Search (`?q=`, `?order=`, `?genre=`) |
-| GET | `/api/movies/{id}` | — | Movie by ID |
-| GET | `/api/genres` | — | All genres |
-| POST | `/api/account/register` | — | Register |
-| POST | `/api/account/authenticate` | — | Login, returns JWT |
-| GET | `/api/account/favorites` | JWT | User favorites |
-| GET | `/api/account/watchlist` | JWT | User watchlist |
-| POST | `/api/account/save-to-collection` | JWT | Add to favorites or watchlist |
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/movies/top` | Top movies |
+| GET | `/api/movies/random` | Random movies |
+| GET | `/api/movies/search` | Search (`?q=`, `?order=`, `?genre=`) |
+| GET | `/api/movies/{id}` | Movie by ID |
+| GET | `/api/genres` | All genres |
+| POST | `/api/account/register` | Register |
+| POST | `/api/account/authenticate` | Login, returns JWT |
+| GET | `/api/account/favorites` | User favorites |
+| GET | `/api/account/watchlist` | User watchlist |
+| POST | `/api/account/save-to-collection` | Add to favorites or watchlist |
