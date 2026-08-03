@@ -114,7 +114,7 @@ window.app = {
                 console.log(e);
             }
         } else {
-            app.Router.go("/account/");
+            app.Router.go("/account/login");
         }
     },
 };
